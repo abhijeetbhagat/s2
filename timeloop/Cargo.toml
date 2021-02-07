@@ -1,0 +1,8 @@
+[package]
+name = "s2_timeloop"
+version = "0.1.0"
+authors = ["abhi"]
+edition = "2018"
+
+[dependencies]
+s2_codegen = { path = "../codegen"}
