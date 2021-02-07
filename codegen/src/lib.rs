@@ -1,29 +1,38 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
+use proc_macro2::Span;
 use quote::quote;
 use syn::{self, NestedMeta};
 
 #[proc_macro_attribute]
 pub fn job(args: TokenStream, input: TokenStream) -> TokenStream {
     let args = syn::parse_macro_input!(args as syn::AttributeArgs);
+    if args.is_empty() {
+        return syn::Error::new(Span::call_site(), "Integer interval in seconds is expected")
+            .to_compile_error()
+            .into();
+    }
+
     let mut value = 1;
     for arg in args {
         match arg {
             NestedMeta::Meta(_) => {
-                // TODO abhi: flag error here
+                return syn::Error::new_spanned(arg, "Integer interval in seconds is expected")
+                    .to_compile_error()
+                    .into()
             }
-            NestedMeta::Lit(lit) => {
-                match lit {
-                    syn::Lit::Int(secs) => {
-                        value = secs.base10_parse::<u64>().unwrap();
-                        break;
-                    }
-                    _ => {
-                        // TODO abhi: flag error here
-                    }
+            NestedMeta::Lit(lit) => match lit {
+                syn::Lit::Int(secs) => {
+                    value = secs.base10_parse::<u64>().unwrap();
+                    break;
                 }
-            }
+                _ => {
+                    return syn::Error::new_spanned(lit, "Integer interval in seconds is expected")
+                        .to_compile_error()
+                        .into()
+                }
+            },
         }
     }
 
