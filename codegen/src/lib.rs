@@ -39,6 +39,10 @@ pub fn job(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut input = syn::parse_macro_input!(input as syn::ItemFn);
     let attrs = &input.attrs;
     let vis = &input.vis;
+    input
+        .sig
+        .inputs
+        .push(syn::parse_str("rx: std::sync::mpsc::Receiver<()>").unwrap());
     let sig = &mut input.sig;
     let body = &input.block;
 
