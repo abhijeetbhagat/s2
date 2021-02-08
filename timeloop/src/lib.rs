@@ -1,13 +1,17 @@
 use std::sync::mpsc;
+use std::sync::Arc;
 use std::thread::JoinHandle;
+
 pub struct TimeLoop {
-    jobs: Vec<fn(rx: mpsc::Receiver<()>)>,
+    jobs: Vec<Arc<fn(rx: mpsc::Receiver<()>)>>,
     handles: Vec<JoinHandle<()>>,
     senders: Vec<mpsc::Sender<()>>,
 }
 
 impl TimeLoop {
-    pub fn new(jobs: Vec<fn(rx: mpsc::Receiver<()>)>) -> Self {
+    pub fn new(mut jobs: Vec<fn(rx: mpsc::Receiver<()>)>) -> Self {
+        let jobs = jobs.drain(..).map(|j| Arc::new(j)).collect();
+
         TimeLoop {
             jobs,
             handles: Vec::new(),
